@@ -8,8 +8,8 @@
 // read the leaderboard view and call submit_score(), so it cannot edit other players.
 // Leave both empty to run fully offline: the game still works, Ranks shows only your own score.
 
-export const SUPABASE_URL = '';
-export const SUPABASE_ANON_KEY = '';
+export const SUPABASE_URL = 'https://yuntumzyxetfasbrkiil.supabase.co';
+export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1bnR1bXp5eGV0ZmFzYnJraWlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0MjM0MTIsImV4cCI6MjEwNTk5OTQxMn0.QNFZxnSatK20XVjXe8n57JU9_ukFMsejzo6PfuB3UxE';
 
 // Shown when a player taps "Invite friends". Leave empty to share the current page address.
-export const SHARE_URL = '';
+export const SHARE_URL = 'https://shiva78388789.github.io/Akhbar-Rush/';
