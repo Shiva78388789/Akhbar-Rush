@@ -1,0 +1,10 @@
+{
+ "ride":      {"frames":[{"lift":0},{"lift":0,"nod":1},{"lift":0},{"lift":0,"nod":1}],
+               "rot":[0,0,0,0],"ms":[80,80,80,80],"loop":true},
+ "lane_up":   {"frames":[{"lean":2,"face":"focus"},{"lift":1,"lean":3,"face":"focus"},{"lift":1,"lean":3,"face":"focus"},{"lean":2},{"lift":-1,"nod":1},{}],
+               "rot":[2,7,9,5,-2,0],"progress":[0.05,0.22,0.52,0.82,0.98,1],"ms":[50,60,70,70,70,80]},
+ "lane_down": {"frames":[{"lean":-1,"face":"focus"},{"lift":-1,"lean":-2,"face":"focus"},{"lift":-1,"lean":-2,"face":"focus"},{"lean":-1},{"lean":1,"nod":1},{}],
+               "rot":[-2,-6,-8,-4,2,0],"progress":[0.05,0.22,0.52,0.82,0.98,1],"ms":[50,60,70,70,70,80]},
+ "jump":      {"pedal":0,"frames":[{"lift":-3,"lean":2,"face":"focus"},{"lift":2,"lean":1,"face":"whee"},{"lift":2,"face":"whee"},{"lift":1,"face":"whee"},{"lean":1},{"lean":1,"face":"focus"},{"lift":-3,"lean":2,"face":"focus","sweat":1,"nod":1},{"lift":-1,"lean":1}],
+               "rot":[0,12,8,2,-5,-3,0,0],"y":[0,4,14,22,18,9,0,0],"ms":[70,50,70,100,70,60,70,80]}
+}

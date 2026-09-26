@@ -1,0 +1,13 @@
+# Cache rules for Cloudflare Pages and Netlify.
+/sw.js
+  Cache-Control: no-cache
+/index.html
+  Cache-Control: no-cache
+/src/*
+  Cache-Control: no-cache
+/style.css
+  Cache-Control: no-cache
+/assets/*
+  Cache-Control: public, max-age=604800
+/icons/*
+  Cache-Control: public, max-age=604800
