@@ -5,7 +5,7 @@ import {$,$$,clamp,fmt,rng,weekId,today,el} from './util.js';
 import {P,save,totalStars,levelsDone,t,applyLang} from './profile.js';
 import {audio,sfx,buzz,setMusicTrack,duck,resumeAudio,unlockAudio,musicPlaying} from './audio.js';
 import * as LB from './leaderboard.js';
-import {setupPWA,shareGame,toast} from './pwa.js';
+import {setupPWA,shareGame,toast,iosInstallTip} from './pwa.js';
 /* ---------- music routing ---------- */
 function musicFor(){return(G.mode==='play'||G.mode==='count'||G.mode==='paused'||G.mode==='crash')?(G.lv===5||G.lv===10?'event':'ride'):'menu';}
 function setMusic(on){setMusicTrack(on,musicFor());}
@@ -293,7 +293,7 @@ const standalone=()=>matchMedia('(display-mode: fullscreen), (display-mode: stan
 function goFull(){const d=document.documentElement,req=d.requestFullscreen||d.webkitRequestFullscreen;if(!req||standalone()||document.fullscreenElement||document.webkitFullscreenElement||!matchMedia('(pointer:coarse)').matches||document.activeElement===$('#pname'))return;
  try{const r=req.call(d,{navigationUI:'hide'});if(r&&r.then)r.then(()=>screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{})).catch(()=>{});}catch(e){}}
 let iosHint=false;
-function titleTap(){unlockAudio();sfx('bell');goFull();if(!iosHint&&/iphone|ipod/i.test(navigator.userAgent)&&!standalone()){iosHint=true;setTimeout(()=>toast('Full screen on iPhone: tap Share → "Add to Home Screen"'),800);}
+function titleTap(){unlockAudio();sfx('bell');goFull();if(!iosHint&&/iphone|ipod/i.test(navigator.userAgent)&&!standalone()){iosHint=true;setTimeout(()=>toast(iosInstallTip(),null,7000),800);}
  setMusic(true);if(!P.name){nm={name:'',cap:0,home:0};show('name');}else if(!dailyState().claimed)show('daily');else show('menu');}
 $('#titleTap').addEventListener('click',titleTap);
 for(const ev of ['pointerup','touchend','click','keydown'])addEventListener(ev,()=>{unlockAudio();if(ev!=='keydown')goFull();},true);

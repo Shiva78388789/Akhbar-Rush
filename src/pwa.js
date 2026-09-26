@@ -4,13 +4,13 @@ import {SHARE_URL} from './config.js';
 
 let installEvent = null;
 
-export function toast(text, action) {
+export function toast(text, action, ms = 2600) {
   const t = $('#toast');
   t.textContent = text;
   t.hidden = false;
   t.onclick = () => { t.hidden = true; if (action) action(); };
   clearTimeout(t._timer);
-  if (!action) t._timer = setTimeout(() => { t.hidden = true; }, 2600);
+  if (!action) t._timer = setTimeout(() => { t.hidden = true; }, ms);
 }
 
 export async function shareGame() {
@@ -21,6 +21,13 @@ export async function shareGame() {
   } catch (e) { if (e && e.name === 'AbortError') return; }
   try { await navigator.clipboard.writeText(url); toast('Link copied – send it to your friends!'); }
   catch (e) { toast(url); }
+}
+
+/** iPhone has no install prompt: explain where "Add to Home Screen" is in this browser. */
+export function iosInstallTip() {
+  return /CriOS/.test(navigator.userAgent)
+    ? 'Full screen: tap Share (square with arrow, next to the address bar), then "Add to Home Screen".'
+    : 'Full screen: tap Share (square with arrow), then "Add to Home Screen".';
 }
 
 export function setupPWA() {
@@ -35,7 +42,7 @@ export function setupPWA() {
   });
   // iPhone: no install prompt API – show a one-time hint instead
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !navigator.standalone;
-  if (ios && b) { b.hidden = false; b.onclick = () => toast('Tap Share, then "Add to Home Screen" to install.'); }
+  if (ios && b) { b.hidden = false; b.onclick = () => toast(iosInstallTip(), null, 7000); }
 
   // Service worker: offline play + "new version" prompt
   if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
