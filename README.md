@@ -89,6 +89,8 @@ npx playwright install chromium   # first time only
 npm test
 ```
 
+The test plays the game on a computer screen and then, with touch taps only, as an iPhone and as an Android phone.
+
 ## Credits
 
 Game, art and music © Shiva Games. Fonts: Press Start 2P, Pixelify Sans and Hind (Google Fonts, SIL Open Font License).

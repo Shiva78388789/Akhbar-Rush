@@ -53,5 +53,6 @@ export function unlockAudio(){audio();if(!AC)return;
  resumeAudio();
  if(!unlocked){try{const b=AC.createBuffer(1,1,22050),s=AC.createBufferSource();s.buffer=b;s.connect(AC.destination);s.start(0);}catch(e){}}
  if(AC.state==='running')unlocked=true;}
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)resumeAudio();});
+// Silence the game while it's in the background (app switch, screen lock) on every phone.
+document.addEventListener('visibilitychange',()=>{if(!AC)return;if(document.hidden)AC.suspend().catch(()=>{});else resumeAudio();});
 export function musicPlaying(){return musicOn;}

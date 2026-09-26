@@ -15,6 +15,15 @@ npm test         # headless smoke test (needs `npm install` + `npx playwright in
 ```
 
 Always run `npm test` after gameplay or UI changes and look at `tests/screens/*.png`.
+If Chromium is already installed elsewhere, point the test at it: `CHROMIUM_PATH=/path/to/chrome npm test`.
+
+**Every fix must work on both iPhone and Android.** The owner plays on an iPhone (Chrome, which is WebKit
+underneath) and players are also on Android Chrome. Never ship a platform-specific fix without checking the
+other platform. The smoke test replays the game with touch taps as an iPhone and as an Android phone;
+extend `touchRun()` in `tests/smoke.mjs` when you fix a touch/UI bug so it stays fixed on both.
+- In-game buttons use `tap()` in `main.js` (acts on finger-up), because iPhones can drop `click` while the game animates.
+- Screens shown over the ride (`show(id, true)`) must sit above `#hud` (DOM order or `z-index`), or the HUD eats their taps.
+- Sound unlocks in `unlockAudio()` on tap-end/click; page full screen exists only on Android (iPhone: Add to Home Screen).
 
 ## Map of the code
 

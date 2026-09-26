@@ -9,6 +9,8 @@ body{margin:0;background:var(--night);overflow:hidden;touch-action:none;-webkit-
 .pix{image-rendering:pixelated}
 .layer{position:absolute;inset:0}
 .screen{position:absolute;inset:0}
+/* Settings can open over the paused ride; keep it above the in-game HUD so its buttons get the taps. */
+#settings{z-index:2}
 .dim{position:absolute;inset:0;background:rgba(18,22,40,.55)}
 .px{font-family:var(--px)}
 .pbtn{display:inline-flex;align-items:center;justify-content:center;gap:10px;box-sizing:border-box;border:3px solid var(--ink);box-shadow:0 5px 0 var(--ink);cursor:pointer;font-family:var(--px);font-size:12px;color:var(--ink);background:var(--gold);padding:0 14px;transition:transform .05s;text-decoration:none}

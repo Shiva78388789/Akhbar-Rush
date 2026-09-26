@@ -2,7 +2,7 @@
 // Code (html/js/css) is network-first so updates show up as soon as you deploy;
 // images and fonts are cache-first. Bump VERSION on every release to clear old caches
 // and trigger the "New version ready" prompt in the game.
-const VERSION = 'akhbaar-rush-v1.0.4';
+const VERSION = 'akhbaar-rush-v1.0.5';
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(['./', 'index.html', 'style.css', 'manifest.webmanifest'])).catch(() => {}));
