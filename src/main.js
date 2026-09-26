@@ -178,10 +178,15 @@ function pauseGame(){if(G.mode!=='play')return;G.mode='paused';duck(true);
  pg.append(el('div',{style:'margin-top:4px;padding:6px 8px;background:#fff3b8;border:2px dashed #e0a020;font-size:14px',text:'Tip: houses with a paper sign are subscribers. Ride in the top lane to throw.'}));
  show('pause',true);}
 function resume(){if(G.mode!=='paused')return;show('hud');G.mode='play';last=performance.now();duck(false);setMusic(true);}
-$('#hPause').addEventListener('click',pauseGame);$('#pResume').addEventListener('click',resume);
-$('#pRestart').addEventListener('click',()=>{clearTimeout(cdTimer);startLevel(G.city,G.lv);});
-$('#pQuit').addEventListener('click',()=>{toMenu();});
-$('#pSettings').addEventListener('click',()=>{backTo='pause';show('settings',true);});
+/* In-game buttons act on finger-up. iPhones can drop the 'click' of a tap while the game is animating,
+   so we don't wait for it; touchend is cancelled so the late click can't hit the next screen. Keyboard still uses click. */
+function tap(b,fn){let down=false,last=0;b.addEventListener('pointerdown',()=>{down=true;});b.addEventListener('pointercancel',()=>{down=false;});
+ b.addEventListener('pointerup',e=>{if(!down)return;down=false;last=performance.now();fn(e);});b.addEventListener('touchend',e=>{if(e.cancelable)e.preventDefault();},{passive:false});
+ b.addEventListener('click',e=>{if(performance.now()-last<800)return;fn(e);});}
+tap($('#hPause'),pauseGame);tap($('#pResume'),resume);
+tap($('#pRestart'),()=>{clearTimeout(cdTimer);startLevel(G.city,G.lv);});
+tap($('#pQuit'),()=>{toMenu();});
+tap($('#pSettings'),()=>{backTo='pause';show('settings',true);});
 function toMenu(){clearTimeout(cdTimer);duck(false);attract();show('menu');setMusic(true);}
 let endInfo=null;
 function endLevel(ok,why){if(G.ended)return;G.ended=true;G.mode='end';setMusic(false);const L=G.lvData,c=CITIES[G.city];
@@ -193,12 +198,12 @@ function endLevel(ok,why){if(G.ended)return;G.ended=true;G.mode='end';setMusic(f
  $('#eSub').textContent=ok?(stars===3?(hi?'परफ़ेक्ट डिलीवरी!':'Perfect delivery!'):c.name+' · Level '+G.lv):why==='lives'?(hi?'बहुत टक्करें। फिर से कोशिश करें!':'Too many bumps. Try again!'):(hi?'लक्ष्य से कम अख़बार बँटे।':'Not enough papers delivered.');
  const st=$('#eStats');st.innerHTML='';[[hi?'स्कोर':'Score',fmt(G.score)+(newBest?' ★':'')],[hi?'डिलीवर':'Delivered',G.delivered+' / '+L.target],[hi?'सिक्के मिले':'Coins earned','+'+earned],[hi?'छूटे घर':'Houses missed',G.missed]].forEach(r=>st.append(el('div',{style:'display:flex;justify-content:space-between;font-size:16px;border-bottom:2px dashed #cfc7b3;padding-bottom:4px'},[el('span',{text:r[0]}),el('b',{class:'px',style:'font-size:11px',text:String(r[1])})])));
  const main=$('#eMain'),alt=$('#eAlt');
- if(ok){const nxt=G.lv<10?[G.city,G.lv+1]:(G.city<5&&totalStars()>=CITIES[G.city+1].need?[G.city+1,1]:null);main.textContent=nxt?(hi?'अगला लेवल':'NEXT LEVEL'):(hi?'मिशन':'MISSIONS');main.onclick=()=>{nxt?startLevel(nxt[0],nxt[1]):(toMenu(),show('missions'));};alt.textContent=hi?'फिर से':'REPLAY';alt.onclick=()=>startLevel(G.city,G.lv);alt.className='pbtn';}
- else{main.textContent=hi?'फिर कोशिश':'RETRY';main.onclick=()=>startLevel(G.city,G.lv);
-  if(why==='lives'&&!G.contUsed&&P.coins>=100){alt.textContent=hi?'जारी रखें · 100':'CONTINUE · 100';alt.className='pbtn';alt.onclick=()=>{P.coins-=100;save();G.contUsed=true;G.ended=false;G.hearts=1;G.inv=2;G.mode='play';show('hud');hudUpd();setMusic(true);};}
-  else{alt.textContent=hi?'मिशन':'MISSIONS';alt.className='pbtn cream';alt.onclick=()=>{toMenu();show('missions');};}}
+ if(ok){const nxt=G.lv<10?[G.city,G.lv+1]:(G.city<5&&totalStars()>=CITIES[G.city+1].need?[G.city+1,1]:null);main.textContent=nxt?(hi?'अगला लेवल':'NEXT LEVEL'):(hi?'मिशन':'MISSIONS');main.act=()=>{nxt?startLevel(nxt[0],nxt[1]):(toMenu(),show('missions'));};alt.textContent=hi?'फिर से':'REPLAY';alt.act=()=>startLevel(G.city,G.lv);alt.className='pbtn';}
+ else{main.textContent=hi?'फिर कोशिश':'RETRY';main.act=()=>startLevel(G.city,G.lv);
+  if(why==='lives'&&!G.contUsed&&P.coins>=100){alt.textContent=hi?'जारी रखें · 100':'CONTINUE · 100';alt.className='pbtn';alt.act=()=>{P.coins-=100;save();G.contUsed=true;G.ended=false;G.hearts=1;G.inv=2;G.mode='play';show('hud');hudUpd();setMusic(true);};}
+  else{alt.textContent=hi?'मिशन':'MISSIONS';alt.className='pbtn cream';alt.act=()=>{toMenu();show('missions');};}}
  setTimeout(()=>show('end',true),ok?400:100);}
-$('#eMenu').addEventListener('click',toMenu);
+tap($('#eMenu'),toMenu);tap($('#eMain'),()=>$('#eMain').act&&$('#eMain').act());tap($('#eAlt'),()=>$('#eAlt').act&&$('#eAlt').act());
 /* ---------- leaderboard ---------- */
 function pushBoard(){if(!P.name)return;const w=weekId();if(P.week.id!==w)P.week={id:w,papers:0};
  LB.submit({name:P.name,cap:P.cap,city:CITIES[P.home].id,week:w,weekPapers:P.week.papers,total:P.total,best:P.best||0});}
@@ -285,12 +290,12 @@ $$('.tog').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.set;P.se
 $$('#sLang button').forEach(b=>b.addEventListener('click',()=>{P.settings.lang=b.dataset.v;save();rSettings();applyLang();}));
 $$('#sCtl button').forEach(b=>b.addEventListener('click',()=>{P.settings.controls=b.dataset.v;save();rSettings();$('#hBtns').hidden=P.settings.controls!=='buttons';}));
 function closeSettings(){if(backTo==='pause'){show('pause',true);}else show(backTo&&backTo!=='settings'?backTo:'menu');}
-$('#sClose').addEventListener('click',closeSettings);$('#sDone').addEventListener('click',closeSettings);
+tap($('#sClose'),closeSettings);tap($('#sDone'),closeSettings);
 $('#sName').addEventListener('click',()=>{if(backTo==='pause')return;nm={name:P.name,cap:P.cap,home:P.home};show('name');});
 /* ---------- boot ---------- */
 /* Full screen hides the browser's address bar. Android allows it from any tap; iPhone only in the home-screen app. */
 const standalone=()=>matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches||navigator.standalone;
-function goFull(){const d=document.documentElement,req=d.requestFullscreen||d.webkitRequestFullscreen;if(!req||standalone()||document.fullscreenElement||document.webkitFullscreenElement||!matchMedia('(pointer:coarse)').matches||document.activeElement===$('#pname'))return;
+function goFull(){const d=document.documentElement,req=d.requestFullscreen||d.webkitRequestFullscreen;if(!req||/iphone|ipod/i.test(navigator.userAgent)||standalone()||document.fullscreenElement||document.webkitFullscreenElement||!matchMedia('(pointer:coarse)').matches||document.activeElement===$('#pname'))return;
  try{const r=req.call(d,{navigationUI:'hide'});if(r&&r.then)r.then(()=>screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{})).catch(()=>{});}catch(e){}}
 let iosHint=false;
 function titleTap(){unlockAudio();sfx('bell');goFull();if(!iosHint&&/iphone|ipod/i.test(navigator.userAgent)&&!standalone()){iosHint=true;setTimeout(()=>toast(iosInstallTip(),null,7000),800);}
