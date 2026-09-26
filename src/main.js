@@ -3,9 +3,9 @@
 import {VW,VH,SY,LANE_Y,BOY_X,HOUSES,CITIES,BIKES,CAPS,DAILY,NAMES} from './data.js';
 import {$,$$,clamp,fmt,rng,weekId,today,el} from './util.js';
 import {P,save,totalStars,levelsDone,t,applyLang} from './profile.js';
-import {audio,sfx,buzz,setMusicTrack,duck,resumeAudio,musicPlaying} from './audio.js';
+import {audio,sfx,buzz,setMusicTrack,duck,resumeAudio,unlockAudio,musicPlaying} from './audio.js';
 import * as LB from './leaderboard.js';
-import {setupPWA,shareGame} from './pwa.js';
+import {setupPWA,shareGame,toast} from './pwa.js';
 /* ---------- music routing ---------- */
 function musicFor(){return(G.mode==='play'||G.mode==='count'||G.mode==='paused'||G.mode==='crash')?(G.lv===5||G.lv===10?'event':'ride'):'menu';}
 function setMusic(on){setMusicTrack(on,musicFor());}
@@ -20,8 +20,8 @@ function tint(){const bike=BIKES.find(b=>b.id===P.bike)||BIKES[0];const cap=CAPS
   x.putImageData(d,0,0);BOY[k]=c;}}
 /* ---------- stage scaling ---------- */
 const stage=$('#stage');
-function fit(){const a=$('#app'),cs=getComputedStyle(a);const w=a.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),h=a.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);stage.style.transform='scale('+Math.min(w/844,h/390)+')';}
-addEventListener('resize',fit);fit();
+function fit(){const a=$('#app'),vv=window.visualViewport;if(vv&&!document.fullscreenElement){a.style.top=Math.round(vv.offsetTop)+'px';a.style.height=Math.round(vv.height)+'px';a.style.bottom='auto';}else{a.style.top=a.style.height=a.style.bottom='';}const cs=getComputedStyle(a);const w=a.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),h=a.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);stage.style.transform='scale('+Math.min(w/844,h/390)+')';}
+addEventListener('resize',fit);if(window.visualViewport){visualViewport.addEventListener('resize',fit);visualViewport.addEventListener('scroll',fit);}document.addEventListener('fullscreenchange',()=>setTimeout(fit,50));fit();
 /* ---------- screens ---------- */
 let cur='';const SCREENS=['splash','loading','title','name','howto','daily','menu','missions','garage','ranks','settings','hud','countdown','pause','end'];
 let backTo='menu';
@@ -288,9 +288,15 @@ function closeSettings(){if(backTo==='pause'){show('pause',true);}else show(back
 $('#sClose').addEventListener('click',closeSettings);$('#sDone').addEventListener('click',closeSettings);
 $('#sName').addEventListener('click',()=>{if(backTo==='pause')return;nm={name:P.name,cap:P.cap,home:P.home};show('name');});
 /* ---------- boot ---------- */
-function titleTap(){audio();sfx('bell');try{const d=document.documentElement;if(d.requestFullscreen&&matchMedia('(pointer:coarse)').matches)d.requestFullscreen().then(()=>screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{})).catch(()=>{});}catch(e){}
+/* Full screen hides the browser's address bar. Android allows it from any tap; iPhone only in the home-screen app. */
+const standalone=()=>matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches||navigator.standalone;
+function goFull(){const d=document.documentElement,req=d.requestFullscreen||d.webkitRequestFullscreen;if(!req||standalone()||document.fullscreenElement||document.webkitFullscreenElement||!matchMedia('(pointer:coarse)').matches||document.activeElement===$('#pname'))return;
+ try{const r=req.call(d,{navigationUI:'hide'});if(r&&r.then)r.then(()=>screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{})).catch(()=>{});}catch(e){}}
+let iosHint=false;
+function titleTap(){unlockAudio();sfx('bell');goFull();if(!iosHint&&/iphone|ipod/i.test(navigator.userAgent)&&!standalone()){iosHint=true;setTimeout(()=>toast('Full screen on iPhone: tap Share → "Add to Home Screen"'),800);}
  setMusic(true);if(!P.name){nm={name:'',cap:0,home:0};show('name');}else if(!dailyState().claimed)show('daily');else show('menu');}
 $('#titleTap').addEventListener('click',titleTap);
+for(const ev of ['pointerup','touchend','click','keydown'])addEventListener(ev,()=>{unlockAudio();if(ev!=='keydown')goFull();},true);
 addEventListener('pointerdown',()=>{audio();resumeAudio();if(!musicPlaying()&&P.settings.music&&G.mode!=='count'&&G.mode!=='end'&&G.mode!=='crash')setMusic(true);},true);
 function boot(){applyLang();show('splash');const loadP=loadAll(p=>{$('#loadbar').style.width=Math.round(p*100)+'%';});
  const go=()=>{if(cur!=='splash')return;show('loading');loadP.then(()=>{tint();attract();requestAnimationFrame(loop);setTimeout(()=>show('title'),350);});};

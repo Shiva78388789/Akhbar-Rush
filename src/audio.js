@@ -44,5 +44,14 @@ export function setMusicTrack(on,want){if(!AC||!on||!P.settings.music){musicOn=f
  musicNodes();if(musicOn&&curTrack===want){duck(duckOn);return;}
  musicOn=true;curTrack=want;mStep=0;mNext=AC.currentTime+.08;const tr=TRACKS[want];echoIn.gain.value=tr.echo;duck(duckOn);clearInterval(mTimer);mTimer=setInterval(musicTick,40);musicTick();}
 export function duck(on){duckOn=on;if(musicGain&&AC)musicGain.gain.setTargetAtTime(on?.18:.55,AC.currentTime,.12);}
-export function resumeAudio(){if(AC&&AC.state==='suspended')AC.resume();}
+export function resumeAudio(){if(AC&&AC.state!=='running')AC.resume().catch(()=>{});}
+/* Phones only let sound start inside a real tap (touchend/click), not on touch-down, and iPhones also
+   need a sound to be played in that tap. Call this from every tap/key event until audio is running. */
+let unlocked=false;
+export function unlockAudio(){audio();if(!AC)return;
+ try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){} // iPhone: play even with the silent switch on
+ resumeAudio();
+ if(!unlocked){try{const b=AC.createBuffer(1,1,22050),s=AC.createBufferSource();s.buffer=b;s.connect(AC.destination);s.start(0);}catch(e){}}
+ if(AC.state==='running')unlocked=true;}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)resumeAudio();});
 export function musicPlaying(){return musicOn;}
